@@ -2,8 +2,10 @@ import numpy as np
 from random import randrange, seed
 
 MAX_POPULATION = 50
+F_PROBABILITY = 0.5
+MUTATION_RATE = 1
 
-def criateBoard(n):
+def createBoard(n):
     board = np.zeros((n, n))
     return board
 
@@ -20,24 +22,179 @@ def initializesPopulation(n):
             population[i][j] = randrange(start=0,stop=n)
     return population
 
-#####################################################
-def assessIndividual(board, population,n):
-    fitness_sum = 0
-    cleanBoard(board)
-    #for i in range(n):
-
-
 def generateFitnessVector(population, board, n):
     fitness_population = np.zeros(MAX_POPULATION)
     for i in range(MAX_POPULATION):
-        fitness_population[i] = assessIndividual(board, population[i],n)
-###########################################    
+        fitness_population[i], board = valuationSample(board, population[i],n)
+    return fitness_population, board
+ 
+
+def recombinesTournamentIndividuals(population, n, fitness):
+    indexBetterFitness = 0
+    betterFitness = 0
+    for i in range(MAX_POPULATION):
+        if(fitness[i] < betterFitness):
+            indexBetterFitness = i
+            betterFitness = fitness[i]
+
+    newPopulation = initializesPopulation(n)
+    for i in range(n):
+        newPopulation[0][i] = population[indexBetterFitness][i]
+    
+    for i in range(MAX_POPULATION):
+        fatherA = selectFather(fitness)
+        fatherB = selectFather(fitness)
+        
+        limit =  randrange(start=0,stop=n)
+        
+        for j in range(limit):
+            newPopulation[i][j] = population[fatherA][j]
+            
+        for k in range(limit):
+            newPopulation[i][k] = population[fatherB][k]
+
+        # DELETAR ISSO apaga_populacao(*population);
+        
+    return newPopulation
+        
+def selectFather(fitness):
+    indA = randrange(start=0,stop=MAX_POPULATION)
+    indB = randrange(start=0,stop=MAX_POPULATION)
+    
+    num =  (randrange(start=0,stop=1000))/1000
+
+    if(num < F_PROBABILITY):
+        if (fitness[indA] >  fitness[indB]):
+            return indA
+        else:
+            return indB
+    else:
+        if (fitness[indA] <  fitness[indB]):
+            return indA
+        else:
+            return indB
+
+def recombinesIndividualsElitism(population, n, fitness):
+    indexBetterFitness = 0
+    betterFitness = 100000000
+    
+    for i in range(MAX_POPULATION):
+        if(fitness[i] < betterFitness):
+            indexBetterFitness = i
+            betterFitness = fitness[i]
+
+    for i in range(MAX_POPULATION):
+        limit =  randrange(start=0,stop=n)
+        for j in range(MAX_POPULATION):
+            population[i][j] = population[indexBetterFitness][j]
+            
+    # VERIFICAR RETTORNO AQUIIII
+    return indexBetterFitness, population
+
+def mutation(population, n, mutationRate):
+    for i in range(MAX_POPULATION):
+        if((randrange(start=0,stop=1000)/1000.0) <= MUTATION_RATE):
+            for i in range(mutationRate):
+                genome = randrange(start=0,stop=n)
+                if(population[i][genome] == 0):
+                    population[i][genome] += 1
+                elif(population[i][genome] == n-1):
+                    population[i][genome] -= 1
+                elif(randrange(start=0,stop=2)):   
+                    population[i][genome] += 1
+                else:
+                    population[i][genome] -=1
+
+def randomFeeding(n):
+    vector = [randrange(start=0,stop=n) for i in range(n)]
+    return vector
+
+
+def valuationSample(board, sample, n):
+    sumFitness = 0
+    board = cleanBoard(n)
+    for i in range(n):
+        board = insertPiece(board, i, sample[i], 1)
+    for i in range(n):
+        atk, board = verifyAttack(board, n, i, sample[i])
+        sumFitness += atk
+        board = removePiece(board, i, sample[i])
+    return sumFitness, board
+
+
+def insertSample(sample, board, n):
+    for i in range(n):
+        board[i][sample[i]] = 1
+    return 1, board
+
+def cleanBoard(n):
+    board = [[0 for col in range(n)] for row in range(n)]
+    return board
+
+def insertPiece(board, position_X, position_Y, typePiece):
+    if board[position_X][position_Y] != 0:
+        return -1
+    board[position_X][position_Y] = typePiece
+
+    return board
+
+def removePiece(board, position_X, position_Y):
+    if board[position_X][position_Y] == 0:
+        return -1
+    board[position_X][position_Y] = 0
+
+    return board
+
+def verifyAttack(board, n, position_X, position_Y):
+    atk = 0
+    typeCheck = board[position_X][position_Y]
+    
+    if position_X >= n or position_Y >= n:
+        return -1
+        
+    if typeCheck == 1 or typeCheck == 2:
+        for i in range(n):
+            if board[position_X][i] != 0 and i != position_X:
+                atk += 1               
+        for i in range(n):
+            if board[i][position_Y] != 0 and i != position_Y:
+                atk += 1  
+                             
+    if typeCheck == 1 or typeCheck == 3:
+        i = 1
+        while position_X + i < n and position_Y + i < n:
+            if board[position_X + i][position_Y + i] != 0:
+                atk += 1
+            i += 1
+        i = 1
+        while position_X - i >= 0 and position_Y - i >= 0:
+            if board[position_X + i][position_Y + i] != 0:
+                atk += 1
+            i += 1
+        i = 1
+        while position_X + i < n and position_Y - i >= 0:
+            if board[position_X + i][position_Y + i] != 0:
+                atk += 1
+            i += 1
+        i = 1
+        while position_X - i >= 0 and position_Y + i < n:
+            if board[position_X + i][position_Y + i] != 0:
+                atk += 1
+            i += 1
+            
+    return atk
+
+def printBoard(board, n):
+    for i in range(n):
+        for j in range(n):
+            print(board[i][j])
+    print("\n")
 
 def main():
     seed(7)
     #print("Type the dimension n desired for the board: ")
     n = 10
-    board = criateBoard(n)
+    board = createBoard(n)
     genocides = 0
     stop_criterion = 1
     best_individual = np.zeros(n)
@@ -52,6 +209,39 @@ def main():
                 population[0][i] = best_individual[i]
         while True:
             fitness = generateFitnessVector(population,board,n)
+            index_best_individual = recombinesIndividualsElitism(population,n,fitness)
+            for i in range(n):
+                best_individual[i] = population[index_best_individual][i]
+            mutation(population,n,mutation_rate)
+            cleanBoard(board,n)
+            insertSample(population[best_individual],board, n)
+            #printBoard(board,n)
+            generation = generation+1
+            fitness_best_individual = valuationSample(board, best_individual, n)
+            #print("Generation: ",generation)
+            #print("fitness: ",fitness_best_individual)
+            if fitness_best_individual == 0:
+                insertSample(best_individual, board, n)
+                printBoard(board, n)
+                #print("Generation: ",generation)
+                #print("genocidios: ", genocides)
+                #print("fitness: ",fitness_best_individual)
+                stop_criterion = 0
+                break
+            if fitness_best_individual == fitness_previous:
+                mutation_rate = mutation_rate+1
+            elif fitness_best_individual < fitness_previous:
+                mutation_rate = 0
+            fitness_previous = fitness_best_individual
+            if mutation_rate == n:
+                genocides = genocides+1
+                mutation_rate = 1
+                population = 0
+                break
+    print("End")
+    return 0
+            
+
 
 if __name__ == "__main__":
     main()
