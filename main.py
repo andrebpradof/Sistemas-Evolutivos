@@ -93,7 +93,7 @@ def recombinesIndividualsElitism(population, n, fitness):
 def mutation(population, n, mutationRate):
     for i in range(MAX_POPULATION):
         if((randrange(start=0,stop=1000)/1000.0) <= MUTATION_RATE):
-            for i in range(mutationRate):
+            for j in range(mutationRate):
                 genome = randrange(start=0,stop=n)
                 if(population[i][genome] == 0):
                     population[i][genome] += 1
@@ -169,22 +169,22 @@ def verifyAttack(board, n, position_X, position_Y):
                              
     if typeCheck == 1 or typeCheck == 3:
         i = 1
-        while position_X + i < n and position_Y + i < n:
+        while (position_X + i < n) and (position_Y + i < n):
             if board[position_X + i][position_Y + i] != 0:
                 atk += 1
             i += 1
         i = 1
-        while position_X - i >= 0 and position_Y - i >= 0:
+        while (position_X - i >= 0) and (position_Y - i >= 0):
             if board[position_X - i][position_Y - i] != 0:
                 atk += 1
             i += 1
         i = 1
-        while position_X + i < n and position_Y - i >= 0:
+        while (position_X + i < n) and (position_Y - i >= 0):
             if board[position_X + i][position_Y - i] != 0:
                 atk += 1
             i += 1
         i = 1
-        while position_X - i >= 0 and position_Y + i < n:
+        while (position_X - i >= 0) and (position_Y + i < n):
             if board[position_X - i][position_Y + i] != 0:
                 atk += 1
             i += 1
@@ -230,11 +230,11 @@ def main():
             population = mutation(population,n,mutation_rate)
             board = cleanBoard(board,n)
             board = insertSample(population[index_best_individual],board, n)
-            printBoard(board,n)
+            #printBoard(board,n)
             generation += 1
             fitness_best_individual, board = valuationSample(board, best_individual, n)
-            print("Generation: ",generation)
-            print("fitness: ",fitness_best_individual)
+            #print("Generation: ",generation)
+            #print("fitness: ",fitness_best_individual)
             if fitness_best_individual == 0:
                 board = insertSample(best_individual, board, n)
                 printBoard(board, n)
@@ -249,7 +249,7 @@ def main():
                 mutation_rate = 0
             fitness_previous = fitness_best_individual
             if mutation_rate == n:
-                genocides = genocides+1
+                genocides += 1
                 mutation_rate = 1
                 population = 0
                 break
