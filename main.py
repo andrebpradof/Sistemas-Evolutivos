@@ -112,6 +112,7 @@ def randomFeeding(n):
 
 def valuationSample(board, sample, n):
     sumFitness = 0
+    atk = 0
     board = cleanBoard(board, n)
     for i in range(n):
         board = insertPiece(board, i, sample[i], 1)
@@ -193,11 +194,17 @@ def verifyAttack(board, n, position_X, position_Y):
 def printBoard(board, n):
     for i in range(n):
         for j in range(n):
-            print(board[i][j])
-    print("\n")
+            print(" ",board[i][j], " ", end="")
+        print("")
+
+def printPopulation(population, n):
+    for i in range(MAX_POPULATION):
+        for j in range(n):
+            print(" ",population[i][j], " ", end="")
+        print("")
 
 def main():
-    seed(7)
+    #seed(7)
     #print("Type the dimension n desired for the board: ")
     n = 10
     board = createBoard(n)
@@ -211,22 +218,23 @@ def main():
     while stop_criterion:
         population = initializesPopulation(n)
         if generation > 0:
-            for i in range(n):
-                population[0][i] = best_individual[i]
+            if randrange(start=0, stop=2):
+                for i in range(n):
+                    population[0][i] = best_individual[i]
         while True:
             fitness, board = generateFitnessVector(population,board,n)
-            population, index_best_individual = recombinesTournamentIndividuals(population, n, fitness)
-            #index_best_individual, population = recombinesIndividualsElitism(population,n,fitness)
+            #population, index_best_individual = recombinesTournamentIndividuals(population, n, fitness)
+            index_best_individual, population = recombinesIndividualsElitism(population,n,fitness)
             for i in range(n):
                 best_individual[i] = population[index_best_individual][i]
             population = mutation(population,n,mutation_rate)
             board = cleanBoard(board,n)
-            board = insertSample(population[best_individual],board, n)
-            #printBoard(board,n)
+            board = insertSample(population[index_best_individual],board, n)
+            printBoard(board,n)
             generation += 1
             fitness_best_individual, board = valuationSample(board, best_individual, n)
-            #print("Generation: ",generation)
-            #print("fitness: ",fitness_best_individual)
+            print("Generation: ",generation)
+            print("fitness: ",fitness_best_individual)
             if fitness_best_individual == 0:
                 board = insertSample(best_individual, board, n)
                 printBoard(board, n)
@@ -236,7 +244,7 @@ def main():
                 stop_criterion = 0
                 break
             if fitness_best_individual == fitness_previous:
-                mutation_rate = mutation_rate+1
+                mutation_rate += 1
             elif fitness_best_individual < fitness_previous:
                 mutation_rate = 0
             fitness_previous = fitness_best_individual
