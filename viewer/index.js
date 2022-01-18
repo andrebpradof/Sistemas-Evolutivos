@@ -1,5 +1,5 @@
-var NUMBER_OF_COLS = 10,
-    NUMBER_OF_ROWS = 10,
+var NUMBER_OF_COLS = 13,
+    NUMBER_OF_ROWS = 13,
     BLOCK_SIZE = 100;
 
 var BLOCK_COLOUR_1 = '#83A95D',
@@ -47,8 +47,6 @@ function draw() {
 
         // Draw the background
         drawBoard();
-
-        loadBoard();
         //defaultPositions();
 
         // canvas.addEventListener('click', board_click, false);
@@ -135,7 +133,7 @@ function getImageCoords(pieceCode, bBlackTeam) {
 }
 function loadBoard() {
 
-    $.getJSON("sample.json", function (data) {
+    $.getJSON("../simulation.json", function (data) {
 
         var i = 0;
         $.each(data, function (key, element) {
@@ -160,5 +158,3 @@ function doScaledTimeout(i, geracao, genocidio, fitness, element) {
         defaultPositions()
     }, i * 50);
 }
-
-draw()
