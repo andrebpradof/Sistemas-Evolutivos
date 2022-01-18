@@ -1,5 +1,5 @@
-var NUMBER_OF_COLS = 20,
-    NUMBER_OF_ROWS = 20,
+var NUMBER_OF_COLS = 10,
+    NUMBER_OF_ROWS = 10,
     BLOCK_SIZE = 100;
 
 var BLOCK_COLOUR_1 = '#83A95D',
@@ -31,6 +31,8 @@ var PIECE_PAWN = 0,
     currentTurn = WHITE_TEAM,
     selectedPiece = null;
 
+var canvas, ctx
+var total_genocidio = 0
 
 function draw() {
     // Main entry point got the HTML5 chess board example
@@ -46,12 +48,8 @@ function draw() {
         // Draw the background
         drawBoard();
 
-        defaultPositions();
-
-        //Draw pieces
-        pieces = new Image();
-        pieces.src = 'pieces.png';
-        pieces.onload = drawPieces;
+        loadBoard();
+        //defaultPositions();
 
         // canvas.addEventListener('click', board_click, false);
     }
@@ -97,151 +95,14 @@ function getBlockColour(iRowCounter, iBlockCounter) {
 }
 
 function defaultPositions() {
-    json =
-    {
-        "white":
-            [
-                {
-                    "piece": PIECE_CASTLE,
-                    "row": 0,
-                    "col": 0,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_ROUKE,
-                    "row": 0,
-                    "col": 1,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_BISHOP,
-                    "row": 0,
-                    "col": 2,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_KING,
-                    "row": 0,
-                    "col": 3,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_QUEEN,
-                    "row": 0,
-                    "col": 4,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_BISHOP,
-                    "row": 0,
-                    "col": 5,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_ROUKE,
-                    "row": 0,
-                    "col": 6,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_CASTLE,
-                    "row": 0,
-                    "col": 7,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_PAWN,
-                    "row": 1,
-                    "col": 0,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_PAWN,
-                    "row": 1,
-                    "col": 1,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_PAWN,
-                    "row": 1,
-                    "col": 2,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_PAWN,
-                    "row": 1,
-                    "col": 3,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_PAWN,
-                    "row": 1,
-                    "col": 4,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_PAWN,
-                    "row": 1,
-                    "col": 5,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_PAWN,
-                    "row": 1,
-                    "col": 6,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_PAWN,
-                    "row": 1,
-                    "col": 7,
-                    "status": IN_PLAY
-                }
-            ],
-        "black":
-            [
-                {
-                    "piece": PIECE_QUEEN,
-                    "row": 0,
-                    "col": 0,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_QUEEN,
-                    "row": 2,
-                    "col": 2,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_QUEEN,
-                    "row": 5,
-                    "col": 5,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_QUEEN,
-                    "row": 9,
-                    "col": 9,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_QUEEN,
-                    "row": 15,
-                    "col": 13,
-                    "status": IN_PLAY
-                },
-                {
-                    "piece": PIECE_QUEEN,
-                    "row": 10,
-                    "col": 10,
-                    "status": IN_PLAY
-                }
-            ]
-    };
+    //Draw pieces
+    pieces = new Image();
+    pieces.src = 'pieces.png';
+    pieces.onload = drawPieces;
 }
 
 function drawPieces() {
-    drawTeamOfPieces(json.black, true);
+    drawTeamOfPieces(json, true);
     //drawTeamOfPieces(json.white, false);
 }
 
@@ -255,7 +116,7 @@ function drawTeamOfPieces(teamOfPieces, bBlackTeam) {
 }
 
 function drawPiece(curPiece, bBlackTeam) {
-    var imageCoords = getImageCoords(curPiece.piece, bBlackTeam)
+    var imageCoords = getImageCoords(PIECE_QUEEN, bBlackTeam)
     // Draw the piece onto the canvas
     ctx.drawImage(pieces,
         imageCoords.x, imageCoords.y, 300, 300,
@@ -272,3 +133,32 @@ function getImageCoords(pieceCode, bBlackTeam) {
 
     return imageCoords;
 }
+function loadBoard() {
+
+    $.getJSON("sample.json", function (data) {
+
+        var i = 0;
+        $.each(data, function (key, element) {
+
+            doScaledTimeout(i, key, element.genocidio, element.fitness, element.board)
+            i++;
+        });
+
+    });
+
+}
+
+function doScaledTimeout(i, geracao, genocidio, fitness, element) {
+    setTimeout(function () {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        draw();
+        json = element;
+        $("#num_geracao").html(geracao);
+        total_genocidio += genocidio
+        $("#num_genocidio").html(total_genocidio);
+        $("#num_fitness").html(fitness);
+        defaultPositions()
+    }, i * 50);
+}
+
+draw()

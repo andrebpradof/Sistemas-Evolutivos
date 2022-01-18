@@ -1,5 +1,6 @@
 import numpy as np
 from random import randrange, seed
+import json
 
 MAX_POPULATION = 50
 F_PROBABILITY = 0.5
@@ -206,6 +207,33 @@ def printBoard(board, n):
         print("")
 
 
+def generateFileBoard(board, n, generation, stingJson, end, genocide, fitness):
+    boardJson = '"'+str(generation) + \
+        '" : { "genocidio": '+str(genocide) + \
+        ', "fitness": '+str(fitness)+', "board": ['
+    dictionary = ""
+    for i in range(n):
+        for j in range(n):
+            if board[i][j] == 1:
+                # print(i, j, end="")
+                dictionary = dictionary+'{"row": '+str(i)+',"col": '+str(j)+'}'
+                if i != (n-1):
+                    dictionary = dictionary+","
+
+    boardJson = boardJson+dictionary+'] }'
+    if end == 1:
+        boardJson = boardJson+','
+    stingJson = stingJson+boardJson
+    return stingJson
+
+
+def generateFileJson(stingJson):
+    stingJson = stingJson+"}"
+    json_object = json.loads(stingJson)
+    with open("sample.json", "w") as outfile:
+        json.dump(json_object, outfile)
+
+
 def printPopulation(population, n):
     for i in range(MAX_POPULATION):
         for j in range(n):
@@ -224,6 +252,7 @@ def main():
     generation = 0
     mutation_rate = 1
     fitness_previous = 1000000
+    stingJson = '{'
 
     while stop_criterion:
         population = initializesPopulation(n)
@@ -233,23 +262,35 @@ def main():
                     population[0][i] = best_individual[i]
         while True:
             fitness, board = generateFitnessVector(population, board, n)
-            population, index_best_individual = recombinesTournamentIndividuals(
+            #population, index_best_individual = recombinesTournamentIndividuals(population, n, fitness)
+            index_best_individual, population = recombinesIndividualsElitism(
                 population, n, fitness)
-            #index_best_individual, population = recombinesIndividualsElitism(population,n,fitness)
             for i in range(n):
                 best_individual[i] = population[index_best_individual][i]
             population = mutation(population, n, mutation_rate)
             board = cleanBoard(board, n)
             board = insertSample(population[index_best_individual], board, n)
-            # printBoard(board,n)
+            # printBoard(board, n)
+
+            boardAnt = board
             generation += 1
+
             fitness_best_individual, board = valuationSample(
                 board, best_individual, n)
-            print("Generation: ", generation)
+
+            # print("Generation: ", generation)
             #print("fitness: ",fitness_best_individual)
+
             if fitness_best_individual == 0:
                 board = insertSample(best_individual, board, n)
                 printBoard(board, n)
+
+                stingJson = generateFileBoard(
+                    board, n, generation, stingJson, 0, 0, fitness_best_individual)
+                # print(stingJson)
+
+                generateFileJson(stingJson)
+
                 print("Generation: ", generation)
                 print("genocidios: ", genocides)
                 print("fitness: ", fitness_best_individual)
@@ -260,11 +301,20 @@ def main():
             elif fitness_best_individual < fitness_previous:
                 mutation_rate = 0
             fitness_previous = fitness_best_individual
+
             if mutation_rate == n:
                 genocides += 1
                 mutation_rate = 1
                 population = 0
+
+                stingJson = generateFileBoard(
+                    boardAnt, n, generation, stingJson, 1, 1, fitness_best_individual)
+
                 break
+            else:
+                stingJson = generateFileBoard(
+                    boardAnt, n, generation, stingJson, 1, 0, fitness_best_individual)
+
     print("End")
     return 0
 
