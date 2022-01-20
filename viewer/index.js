@@ -35,21 +35,17 @@ var canvas, ctx
 var total_genocidio = 0
 
 function draw() {
-    // Main entry point got the HTML5 chess board example
+   
     canvas = document.getElementById('chess');
 
-    // Canvas supported?
+    
     if (canvas.getContext) {
         ctx = canvas.getContext('2d');
 
-        // Calculdate the precise block size
+  
         BLOCK_SIZE = canvas.height / NUMBER_OF_ROWS;
 
-        // Draw the background
         drawBoard();
-        //defaultPositions();
-
-        // canvas.addEventListener('click', board_click, false);
     }
     else {
         alert("Canvas not supported!");
@@ -61,21 +57,17 @@ function drawBoard() {
         drawRow(iRowCounter);
     }
 
-    // Draw outline
     ctx.lineWidth = 3;
     ctx.strokeRect(0, 0, NUMBER_OF_ROWS * BLOCK_SIZE, NUMBER_OF_COLS * BLOCK_SIZE);
 }
 function drawRow(iRowCounter) {
-    // Draw 8 block left to right
     for (iBlockCounter = 0; iBlockCounter < NUMBER_OF_ROWS; iBlockCounter++) {
         drawBlock(iRowCounter, iBlockCounter);
     }
 }
 function drawBlock(iRowCounter, iBlockCounter) {
-    // Set the background
     ctx.fillStyle = getBlockColour(iRowCounter, iBlockCounter);
 
-    // Draw rectangle for the background
     ctx.fillRect(iRowCounter * BLOCK_SIZE, iBlockCounter * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
 
     ctx.stroke();
@@ -83,7 +75,6 @@ function drawBlock(iRowCounter, iBlockCounter) {
 function getBlockColour(iRowCounter, iBlockCounter) {
     var cStartColour;
 
-    // Alternate the block colour
     if (iRowCounter % 2)
         cStartColour = (iBlockCounter % 2 ? BLOCK_COLOUR_1 : BLOCK_COLOUR_2);
     else
@@ -101,13 +92,11 @@ function defaultPositions() {
 
 function drawPieces() {
     drawTeamOfPieces(json, true);
-    //drawTeamOfPieces(json.white, false);
 }
 
 function drawTeamOfPieces(teamOfPieces, bBlackTeam) {
     var iPieceCounter;
 
-    // Loop through each piece and draw it on the canvas    
     for (iPieceCounter = 0; iPieceCounter < teamOfPieces.length; iPieceCounter++) {
         drawPiece(teamOfPieces[iPieceCounter], bBlackTeam);
     }
@@ -115,7 +104,6 @@ function drawTeamOfPieces(teamOfPieces, bBlackTeam) {
 
 function drawPiece(curPiece, bBlackTeam) {
     var imageCoords = getImageCoords(PIECE_QUEEN, bBlackTeam)
-    // Draw the piece onto the canvas
     ctx.drawImage(pieces,
         imageCoords.x, imageCoords.y, 300, 300,
         curPiece.col * BLOCK_SIZE, curPiece.row * BLOCK_SIZE, BLOCK_SIZE, BLOCK_SIZE);
